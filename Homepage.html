@@ -40,21 +40,21 @@
       function init() {
         // Connect to ROS.
 
-        var ros = new ROSLIB.Ros({
+        var Rosi = new ROSLIB.Ros({
           url: "ws://localhost:9090",
         });
 
-        ros.on("connection", function () {
+        Rosi.on("connection", function () {
           document.getElementById("status").innerHTML = "Connected";
           document.getElementById("dot").style.backgroundColor = "green";
         });
 
-        ros.on("error", function (error) {
+        Rosi.on("error", function (error) {
           document.getElementById("status").innerHTML = "Error";
           document.getElementById("dot").style.backgroundColor = "red";
         });
 
-        ros.on("close", function () {
+        Rosi.on("close", function () {
           document.getElementById("status").innerHTML = "Closed";
           document.getElementById("dot").style.backgroundColor = "#bbb";
         });
@@ -67,14 +67,14 @@
 
         // Setup the nav client.
         var nav = Nav2D.OccupancyGridClientNav({
-          ros: ros,
+          ros: Rosi,
           rootObject: viewer.scene,
           viewer: viewer,
           serverName: "/move_base",
         });
 
         var image_topic = new ROSLIB.Topic({
-          ros: ros,
+          ros: Rosi,
           name: "/camera/rgb/image_raw/compressed",
           messageType: "sensor_msgs/CompressedImage",
         });
@@ -84,27 +84,7 @@
         });
       }
 
-      cmd_vel_listener = new ROSLIB.Topic({
-        ros: ros,
-        name: "/cmd_vel",
-        messageType: "geometry_msgs/Twist",
-      });
-
-      move = function (linear, angular) {
-        var twist = new ROSLIB.Message({
-          linear: {
-            x: linear,
-            y: 0,
-            z: 0,
-          },
-          angular: {
-            x: 0,
-            y: 0,
-            z: angular,
-          },
-        });
-        cmd_vel_listener.publish(twist);
-      };
+      
 
       
 var app = new Vue({
@@ -112,9 +92,8 @@ var app = new Vue({
   // storing the state of the page
   data: {
       connected: true,
-      ros: null,
+      ros: Rosi,
       ws_address:'ws://localhost:9090',
-      logs: [],
       loading: false,
       topic: null,
       message: null,
@@ -127,17 +106,19 @@ var app = new Vue({
               url: this.ws_address
           })
           this.ros.on('connection', () => {
-              this.logs.unshift((new Date()).toTimeString() + ' - Connected!')
+              console.log("here");
               this.connected = true
-              this.loading = false
+              this.loadigng = false
           })
           this.ros.on('error', (error) => {
-              this.logs.unshift((new Date()).toTimeString() + ` - Error: ${error}`)
+              console.log("here");
+
           })
           this.ros.on('close', () => {
-              this.logs.unshift((new Date()).toTimeString() + ' - Disconnected!')
               this.connected = false
               this.loading = false
+              console.log("here");
+
           })
       },
       disconnect: function() {
@@ -247,7 +228,7 @@ var app = new Vue({
           <h3 class="float-md-start mb-0">ROS-Based-Dashboard</h3>
           <nav class="nav nav-masthead justify-content-center float-md-end">
             <a class="nav-link active" aria-current="page" href="#">Home</a>
-            <a class="nav-link" href="#">Connect</a>
+            <a class="nav-link" @click="connect">Connect</a>
             <a class="nav-link" href="#">Instructions</a>
           </nav>
         </div>
