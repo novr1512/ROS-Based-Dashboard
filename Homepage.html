@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en" class="h-100">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta name="generator" content="Hugo 0.84.0">
+   <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+<script type="text/javascript" src="http://static.robotwebtools.org/EaselJS/current/easeljs.min.js"></script>
+<script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript" src="http://static.robotwebtools.org/ros2djs/current/ros2d.min.js"></script>
+<script type="text/javascript" src="http://static.robotwebtools.org/nav2djs/current/nav2d.min.js"></script>
+<script src="src/Nav2D.js"></script>
+<script src="src/navigator/ImageMapClientNav.js"></script>
+<script src="src/navigator/Navigator.js"></script>
+<script src="src/navigator/OccupancyGridClientNav.js"></script>
+<script type="text/javascript">
+
+
+  /**
+   * Setup all GUI elements when the page is loaded.
+   */
+  function init() {
+    // Connect to ROS.
+    
+    var ros = new ROSLIB.Ros({
+      url : 'ws://localhost:9090'
+    });
+
+    ros.on('connection', function() {
+        document.getElementById("status").innerHTML = "Connected";
+        document.getElementById("dot").style.backgroundColor = "green";
+
+      });
+    
+      ros.on('error', function(error) {
+        document.getElementById("status").innerHTML = "Error";
+        document.getElementById("dot").style.backgroundColor = "red";
+
+      });
+    
+      ros.on('close', function() {
+        document.getElementById("status").innerHTML = "Closed";
+        document.getElementById("dot").style.backgroundColor = "#bbb";
+
+      });
+    // Create the main viewer.
+    var viewer = new ROS2D.Viewer({
+      divID : 'nav',
+      width : 750,
+      height : 800
+      
+    });
+
+    // Setup the nav client.
+    var nav = Nav2D.OccupancyGridClientNav({
+      ros : ros,
+      rootObject : viewer.scene,
+      viewer : viewer,
+      serverName :'/move_base'
+
+
+    });
+    
+    
+   var image_topic = new ROSLIB.Topic({
+    ros: ros, name: '/camera/rgb/image_raw/compressed',
+    messageType: 'sensor_msgs/CompressedImage'
+   });
+   image_topic.subscribe(function(message) {
+   document.getElementById('my_image').src = "data:image/jpg;base64," + message.data;
+   });
+  }
+  
+  cmd_vel_listener = new ROSLIB.Topic({
+    ros : ros,
+    name : "/cmd_vel",
+    messageType : 'geometry_msgs/Twist'
+  });
+
+  move = function (linear, angular) {
+    var twist = new ROSLIB.Message({
+      linear: {
+        x: linear,
+        y: 0,
+        z: 0
+      },
+      angular: {
+        x: 0,
+        y: 0,
+        z: angular
+      }
+    });
+    cmd_vel_listener.publish(twist);
+  }
+</script>
+
+    <title>ROS-Based-Dashboard</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/cover/">
+
+    
+
+    <!-- Bootstrap core CSS -->
+<link href="/assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 992px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+      #dot {
+        height: 20px;
+        width: 20px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .center {
+        margin: auto;
+        width: 50%;
+        border:white;
+      }
+    </style>
+
+    
+<link href="cover.css" rel="stylesheet">
+  </head>
+  <body  onload="init()" class="d-flex  h-100 text-center text-white bg-dark">
+    
+<div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+  <header class="mb-auto">
+       <!-- nav -->
+    <div>
+      <h3 class="float-md-start mb-0">ROS-Based-Dashboard</h3>
+      <nav class="nav nav-masthead justify-content-center float-md-end">
+        <a class="nav-link active" aria-current="page" href="#">Home</a>
+        <a class="nav-link" href="#">Connect</a>
+        <a class="nav-link" href="#">Instructions</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container py-4" style ="width:fit-content">
+    <div>
+        <table class= "center" >
+            <tr>
+                <td> <span id="dot"></span></td>
+                <td> <p>Connection status: <span id="status"></span></p></td>
+            </tr>
+        </table>
+      </div>
+      <!--layout-->
+      <div >
+      <div class="p-5 mb-4 bg-light rounded-3">
+        <div class="container-fluid py-4 ">
+          <h1 class="display-5 fw-bold" style="color:black">The Map </h1>
+          <div id="nav"></div>
+        </div>
+      </div>
+  
+      <div class="row align-items-md-stretch">
+        <div class="col-md-6">
+          <div class="h-100 p-3 text-white bg-dark rounded-3">
+            <h4>Camera</h4>
+            <img id="my_image" style='height: 100%; width: 100%; object-fit: contain' src="src/placeholder.png">
+        </div>
+        </div>
+        <div class="col-md-6">
+          <div class="h-100 p-5 bg-light border rounded-3" >
+            <h4 style="color:black">move your robot</h4>
+            <div id="zone_joystick" style="position: relative;"></div>
+
+        </div>
+        </div>
+    </div>
+      </div>
+        <!--end layout-->
+
+      <footer class="pt-3 mt-4 text-muted border-top">
+        &copy; 2021
+      </footer>
+    </div>
+  </main>
+
+  <footer class="mt-auto text-white-50">
+    <p>Dashboard for <a href="https://www.kacst.edu.sa/" class="text-white">KACST</a>, by Nouf Ali.</p>
+  </footer>
+</div>
+  </body>
+</html>
