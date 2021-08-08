@@ -40,41 +40,41 @@
       function init() {
         // Connect to ROS.
 
-        var Rosi = new ROSLIB.Ros({
+        var ros = new ROSLIB.Ros({
           url: "ws://localhost:9090",
         });
 
-        Rosi.on("connection", function () {
+        ros.on("connection", function () {
           document.getElementById("status").innerHTML = "Connected";
           document.getElementById("dot").style.backgroundColor = "green";
         });
 
-        Rosi.on("error", function (error) {
+        ros.on("error", function (error) {
           document.getElementById("status").innerHTML = "Error";
           document.getElementById("dot").style.backgroundColor = "red";
         });
 
-        Rosi.on("close", function () {
+        ros.on("close", function () {
           document.getElementById("status").innerHTML = "Closed";
           document.getElementById("dot").style.backgroundColor = "#bbb";
         });
         // Create the main viewer.
         var viewer = new ROS2D.Viewer({
           divID: "nav",
-          width: 250,
-          height: 300,
+          width: 328,
+          height: 350,
         });
 
         // Setup the nav client.
         var nav = Nav2D.OccupancyGridClientNav({
-          ros: Rosi,
+          ros: ros,
           rootObject: viewer.scene,
           viewer: viewer,
           serverName: "/move_base",
         });
 
         var image_topic = new ROSLIB.Topic({
-          ros: Rosi,
+          ros: ros,
           name: "/camera/rgb/image_raw/compressed",
           messageType: "sensor_msgs/CompressedImage",
         });
@@ -92,7 +92,7 @@ var app = new Vue({
   // storing the state of the page
   data: {
       connected: true,
-      ros: Rosi,
+      ros: ros,
       ws_address:'ws://localhost:9090',
       loading: false,
       topic: null,
@@ -215,12 +215,23 @@ var app = new Vue({
         width: 50%;
         border: white;
       }
+      .button {
+        border-radius: 8px;
+        background-color: white;
+        color: black;
+        border: 2px solid #555555;
+      }
+      .button:hover {
+        background-color: #555555;
+        color: white;
+      }
+      
     </style>
 
     <link href="cover.css" rel="stylesheet" />
   </head>
 
-  <body onload="init()" class="d-flex h-100 text-center text-white bg-dark">
+  <body onload="init()" class="d-flex text-center text-white bg-dark">
     <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
       <header class="mb-auto">
         <!-- nav -->
@@ -228,14 +239,13 @@ var app = new Vue({
           <h3 class="float-md-start mb-0">ROS-Based-Dashboard</h3>
           <nav class="nav nav-masthead justify-content-center float-md-end">
             <a class="nav-link active" aria-current="page" href="#">Home</a>
-            <a class="nav-link" @click="connect">Connect</a>
             <a class="nav-link" href="#">Instructions</a>
           </nav>
         </div>
       </header>
       <main class="border-top">
-        <div class="container py-4" style="width: fit-content">
-          <div>
+        <div class="container" style="width: fit-content">
+          <div class="py-1">
             <table >
               <tr>
                 <td><span id="dot"></span></td>
@@ -266,31 +276,30 @@ var app = new Vue({
                 </div>
               </div>
               <div class="row pt-1">
-                <div class="h-100 mx-4 p-5 bg-light border rounded-3" style = "width:fit-content">
-                  <h6 style="color: black">move your robot</h6>
+                <div class="h-100 mx-4 my-4 p-3 bg-light border rounded-3" style = "width:fit-content">
                   <div class="row">
        
             <!-- 1st row -->
             <div class="col-md-12 text-center">
-              <button @click="forward" :disabled="loading || !connected" class="btn btn-primary">forward</button>
+              <button @click="forward" :disabled="loading || !connected" class="button">forward</button>
               <br><br>
           </div>
 
           <!-- 2nd row -->
           <div class="col-md-4 text-center">
-              <button @click="turnLeft" :disabled="loading || !connected" class="btn btn-primary">left</button>
+              <button @click="turnLeft" :disabled="loading || !connected" class="button">left</button>
           </div>
           <div class="col-md-4 text-center">
-              <button @click="stop" :disabled="loading || !connected" class="btn btn-danger">Stop</button>
+              <button @click="stop" :disabled="loading || !connected" class="button">Stop</button>
               <br><br>
           </div>
           <div class="col-md-4 text-center">
-              <button @click="turnRight" :disabled="loading || !connected" class="btn btn-primary">right</button>
+              <button @click="turnRight" :disabled="loading || !connected" class="button">right</button>
           </div>
 
           <!-- 3rd row -->
           <div class="col-md-12 text-center">
-              <button @click="backward" :disabled="loading || !connected" class="btn btn-primary">backward</button>
+              <button @click="backward" :disabled="loading || !connected" class="button">backward</button>
           </div>
                 </div>
                 </div>
@@ -299,17 +308,17 @@ var app = new Vue({
           </div>
           <!--end layout-->
 
-          <footer class="text-muted border-top">&copy; 2021</footer>
+          <footer class="text-muted border-top">&copy; 2021
+
+            <p>
+              Dashboard for
+              <a href="https://www.kacst.edu.sa/" class="text-white">KACST</a>, by
+              Nouf Ali.
+            </p>
+          </footer>
         </div>
       </main>
 
-      <footer class="mt-auto text-white-50">
-        <p>
-          Dashboard for
-          <a href="https://www.kacst.edu.sa/" class="text-white">KACST</a>, by
-          Nouf Ali.
-        </p>
-      </footer>
     </div>
 
   </body>
