@@ -40,26 +40,7 @@
 
        var ros=null
       function init() {
-        // Connect to ROS.
 
-        var ros = new ROSLIB.Ros({
-          url: "ws://localhost:9090",
-        });
-
-        ros.on("connection", function () {
-          document.getElementById("status").innerHTML = "Connected";
-          document.getElementById("dot").style.backgroundColor = "green";
-        });
-
-        ros.on("error", function (error) {
-          document.getElementById("status").innerHTML = "Error";
-          document.getElementById("dot").style.backgroundColor = "red";
-        });
-
-        ros.on("close", function () {
-          document.getElementById("status").innerHTML = "Closed";
-          document.getElementById("dot").style.backgroundColor = "#bbb";
-        });
         // Create the main viewer.
         var viewer = new ROS2D.Viewer({
           divID: "nav",
@@ -96,6 +77,35 @@
         name: '/cmd_vel_mux/input/navi',
         messageType: 'geometry_msgs/Twist'
     });
+}
+
+function connect() {
+ var address = Document.getElementById("ip");
+ if(address == "")
+ {
+   address = "ws://localhost:9090"
+ }
+  ros = new ROSLIB.Ros({
+      url: address
+  })
+        // Connect to ROS.
+
+        ros.on("connection", function () {
+          document.getElementById("status").innerHTML = "Connected";
+          document.getElementById("dot").style.backgroundColor = "green";
+        });
+
+        ros.on("error", function (error) {
+          document.getElementById("status").innerHTML = "Error";
+          document.getElementById("dot").style.backgroundColor = "red";
+        });
+
+        ros.on("close", function () {
+          document.getElementById("status").innerHTML = "Closed";
+          document.getElementById("dot").style.backgroundColor = "#bbb";
+        });
+
+        init();
 }
 
 function forward() {
@@ -217,8 +227,16 @@ function stop() {
               <tr>
                 <td><span id="dot"></span></td>
                 <td>
-                  <p>Connection status: <span id="status"></span></p>
+                  <p>Connection status: <span id="status">unknown</span></p>
                 </td>
+                <td>
+                  <div style="padding-left: 150px;"></div>
+                </td>
+                <td>
+                  <input type="text" id="ip" placeholder="ws://localhost:9090" >
+                  <button type="button" id = "connectbtn" class="btn btn-sm btn-secondary fw-bold border-white bg-white" onclick="connect()">connect</button>    
+                </td>
+
               </tr>
             </table>
           </div>
