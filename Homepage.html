@@ -37,6 +37,8 @@
       /**
        * Setup all GUI elements when the page is loaded.
        */
+
+       var ros=null
       function init() {
         // Connect to ROS.
 
@@ -85,96 +87,61 @@
       }
 
       
-
+      var topic=null  
+      var message=null
       
-var app = new Vue({
-  el: '#app',
-  // storing the state of the page
-  data: {
-      connected: true,
-      ros: ros,
-      ws_address:'ws://localhost:9090',
-      loading: false,
-      topic: null,
-      message: null,
-  },
-  // helper methods to connect to ROS
-  methods: {
-      connect: function() {
-          this.loading = true
-          this.ros = new ROSLIB.Ros({
-              url: this.ws_address
-          })
-          this.ros.on('connection', () => {
-              console.log("here");
-              this.connected = true
-              this.loadigng = false
-          })
-          this.ros.on('error', (error) => {
-              console.log("here");
+      function setTopic() {
+        topic = new ROSLIB.Topic({
+        ros: ros,
+        name: '/cmd_vel_mux/input/navi',
+        messageType: 'geometry_msgs/Twist'
+    });
+}
 
-          })
-          this.ros.on('close', () => {
-              this.connected = false
-              this.loading = false
-              console.log("here");
+function forward() {
+        message = new ROSLIB.Message({
+        linear: { x: 1, y: 0, z: 0, },
+        angular: { x: 0, y: 0, z: 0, },
+    });
+    setTopic()
+    topic.publish(message)
+}
 
-          })
-      },
-      disconnect: function() {
-          this.ros.close()
-      },
-      setTopic: function() {
-          this.topic = new ROSLIB.Topic({
-              ros: this.ros,
-              name: '/cmd_vel_mux/input/navi',
-              messageType: 'geometry_msgs/Twist'
-          })
-      },
-      forward: function() {
-          this.message = new ROSLIB.Message({
-              linear: { x: 1, y: 0, z: 0, },
-              angular: { x: 0, y: 0, z: 0, },
-          })
-          this.setTopic()
-          this.topic.publish(this.message)
-      },
-      stop: function() {
-          this.message = new ROSLIB.Message({
-              linear: { x: 0, y: 0, z: 0, },
-              angular: { x: 0, y: 0, z: 0, },
-          })
-          this.setTopic()
-          this.topic.publish(this.message)
-      },
-      backward: function() {
-          this.message = new ROSLIB.Message({
-              linear: { x: -1, y: 0, z: 0, },
-              angular: { x: 0, y: 0, z: 0, },
-          })
-          this.setTopic()
-          this.topic.publish(this.message)
-      },
-      turnLeft: function() {
-          this.message = new ROSLIB.Message({
-              linear: { x: 0.5, y: 0, z: 0, },
-              angular: { x: 0, y: 0, z: 0.5, },
-          })
-          this.setTopic()
-          this.topic.publish(this.message)
-      },
-      turnRight: function() {
-          this.message = new ROSLIB.Message({
-              linear: { x: 0.5, y: 0, z: 0, },
-              angular: { x: 0, y: 0, z: -0.5, },
-          })
-          this.setTopic()
-          this.topic.publish(this.message)
-      },
-  },
-  mounted() {
-  },
-})
+function backward() {
+        message = new ROSLIB.Message({
+        linear: { x: -1, y: 0, z: 0, },
+        angular: { x: 0, y: 0, z: 0, },
+    });
+    setTopic()
+    topic.publish(message)
+}
+
+function turnLeft() {
+        message = new ROSLIB.Message({
+        linear: { x: 0.5, y: 0, z: 0, },
+        angular: { x: 0, y: 0, z: 0.5, },
+    });
+    setTopic()
+    topic.publish(message)
+}
+
+function turnRight() {
+        message = new ROSLIB.Message({
+       linear: { x: 0.5, y: 0, z: 0, },
+        angular: { x: 0, y: 0, z: -0.5, },
+    });
+    setTopic()
+    topic.publish(message)
+}
+
+function stop() {
+        message = new ROSLIB.Message({
+       linear: { x: 0, y: 0, z: 0, },
+        angular: { x: 0, y: 0, z: 0, },
+    });
+    setTopic()
+    topic.publish(message)
+}
     </script>
 
     <title>ROS-Based-Dashboard</title>
@@ -239,7 +206,7 @@ var app = new Vue({
           <h3 class="float-md-start mb-0">ROS-Based-Dashboard</h3>
           <nav class="nav nav-masthead justify-content-center float-md-end">
             <a class="nav-link active" aria-current="page" href="#">Home</a>
-            <a class="nav-link" href="#">Instructions</a>
+            <a class="nav-link" href="/instructions.html">Instructions</a>
           </nav>
         </div>
       </header>
@@ -281,25 +248,25 @@ var app = new Vue({
        
             <!-- 1st row -->
             <div class="col-md-12 text-center">
-              <button @click="forward" :disabled="loading || !connected" class="button">forward</button>
+              <button onclick="forward()"  class="button">forward</button>
               <br><br>
           </div>
 
           <!-- 2nd row -->
           <div class="col-md-4 text-center">
-              <button @click="turnLeft" :disabled="loading || !connected" class="button">left</button>
+              <button onclick="turnLeft()"  class="button">left</button>
           </div>
           <div class="col-md-4 text-center">
-              <button @click="stop" :disabled="loading || !connected" class="button">Stop</button>
+              <button onclick="stop()"  class="button">Stop</button>
               <br><br>
           </div>
           <div class="col-md-4 text-center">
-              <button @click="turnRight" :disabled="loading || !connected" class="button">right</button>
+              <button onclick="turnRight()"  class="button">right</button>
           </div>
 
           <!-- 3rd row -->
           <div class="col-md-12 text-center">
-              <button @click="backward" :disabled="loading || !connected" class="button">backward</button>
+              <button onclick="backward()"  class="button">backward</button>
           </div>
                 </div>
                 </div>
@@ -308,12 +275,12 @@ var app = new Vue({
           </div>
           <!--end layout-->
 
-          <footer class="text-muted border-top">&copy; 2021
+          <footer class="text-muted border-top">
 
             <p>
-              Dashboard for
-              <a href="https://www.kacst.edu.sa/" class="text-white">KACST</a>, by
-              Nouf Ali.
+              Dashboard to control
+              Turtlebot, by
+              Nouf Ali &copy; 2021.
             </p>
           </footer>
         </div>
