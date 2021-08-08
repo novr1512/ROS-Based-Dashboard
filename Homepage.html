@@ -6,7 +6,13 @@
     <meta name="generator" content="Hugo 0.84.0" />
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
     <meta content="utf-8" http-equiv="encoding" />
-
+    <script>
+      function autoRefresh() {
+          window.location = window.location.href;
+      }
+      setInterval('autoRefresh()', 5000);
+  </script>
+  
     <script
       type="text/javascript"
       src="http://static.robotwebtools.org/EaselJS/current/easeljs.min.js"
@@ -220,9 +226,9 @@ function stop() {
           </nav>
         </div>
       </header>
-      <main class="border-top">
+      <main class="border-top ">
         <div class="container" style="width: fit-content">
-          <div class="py-1">
+          <div class=" my-2 border-bottom">
             <table >
               <tr>
                 <td><span id="dot"></span></td>
